@@ -1,5 +1,30 @@
+Menu, Tray, Icon, imageres.dll, 250, 1
+Menu, Tray, Tip, Lets Hack the Keys
+
 SetNumLockState, AlwaysOn
 SetCapsLockState, AlwaysOff 
+
+~LWin & t:: ; Show the active App
+	Keywait, LWin
+	Keywait, RWin
+	MsgBox % "Your Program : " . GetActiveWindowProcessName()
+
+return
+
+
+GetActiveWindowProcessName() {
+    WinGet, Active_ID, ID, A
+    WinGet, Active_Process, ProcessName, ahk_id %Active_ID%
+    return Active_Process
+}
+
+
+
+;
+#IfWinActive ahk_exe devenv.exe
+	LAlt & w::Send ^{f4}
+	F17::Return
+#IfWinActive
 
 
 #IfWinActive ahk_exe Acrobat.exe
@@ -28,18 +53,72 @@ SetCapsLockState, AlwaysOff
 
 
 SetTitleMatchMode, 2
-meetWindow := "Meet –"
-#If WinActive("ahk_exe brave.exe") && WinActive(meetWindow)
-	LAlt & CapsLock::Send ^e
-	~LWin & CapsLock::Send ^e
-	LAlt & F17::Send ^e
-	~LWin & F17::Send ^e
-	CapsLock::Send ^d
-	F17::Send ^d
+
+
+
+CheckGoogleMeet() {
+	meetWindow := "Google Meet "
+	WinGetTitle, title, A
+	If InStr(title, meetWindow) {
+		return true
+	}
+	return false
+}
+
+
+#If WinActive("ahk_exe brave.exe")
+		LAlt & CapsLock::Send ^e
+		~LWin & CapsLock::Send ^e
+		~LWin & F17::Send ^e
+		CapsLock::Send ^d
+		LAlt & F17::
+			If CheckGoogleMeet() {
+				If GetKeyState("Shift","p") {
+					Send ^!h
+					return
+				} else {
+					Send ^e
+				}
+			}
+			return
+		F17::
+			If CheckGoogleMeet() {
+				Send ^d
+			}			
+		return
+#If
+
+#If WinActive("ahk_exe opera.exe")
+		LAlt & CapsLock::Send ^e
+		~LWin & CapsLock::Send ^e
+		~LWin & F17::Send ^e
+		CapsLock::Send ^d
+		LAlt & F17::
+			If CheckGoogleMeet() {
+				If GetKeyState("Shift","p") {
+					Send ^!h
+					return
+				} else {
+					Send ^e
+				}
+			}
+			return
+		F17::
+			If CheckGoogleMeet() {
+				Send ^d
+			}			
+		return
 #If
 
 
+
 #IfWinActive ahk_exe brave.exe
+	LAlt & LButton::Send ^{LButton}
+	LAlt & w::Send ^w
+	;F17::Return
+#IfWinActive
+
+#IfWinActive ahk_exe opera.exe
 	LAlt & LButton::Send ^{LButton}
 	LAlt & w::Send ^w
 	;F17::Return
@@ -102,6 +181,8 @@ meetWindow := "Meet –"
 	LAlt & LButton::Send ^{LButton}
 #IfWinActive
 
+; Danny Scripts KeyBinding 
+
 ;For keyboards without ~ buttons (Required for linux command)
 +esc::Send ~
 
@@ -113,8 +194,21 @@ else
  Send ^s
 Return
 
+
+;Aligning the emoicon with mac
+LAlt & Space::
+If GetKeyState("LCtrl","p")
+ Send #{.}
+else
+ ;Send #q 
+ Send !{Space}
+Return
+
+
+
 ;For keyboards without Delete buttons
 Shift & Backspace::Send {Delete}
+
 
 LAlt & f::Send ^f
 LAlt & x::Send ^x
@@ -137,9 +231,19 @@ LAlt & i::Send ^i
 LAlt & u::Send ^u
 
 LAlt & `::Send !`t
-LAlt & Space::Send #q
 ~LWin & c::Send ^c ; remove annoying cortanall
 CapsLock::return
 
 
+LAlt & q:: ; Quit with Delay
+KeyWait, q, T0.18
+    If ErrorLevel
+        {
+            Send !{F4}
+            sleep 1000
+        }
+Return  
 
+;For some reason the Windows key gets stuck - Recommended to add below to reset
+Keywait, LWin
+Keywait, RWin
